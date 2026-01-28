@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: sistema-barra
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false  # Configurar manualmente en dashboard
+      - key: JWT_SECRET
+        generateValue: true  # Render genera un secreto aleatorio
+      - key: NEXT_PUBLIC_API_URL
+        value: https://sistema-barra.onrender.com

@@ -1,0 +1,470 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  password      String      // bcrypt hash
+  nombre        String
+  rol           Rol         @default(CAJA)
+  activo        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relaciones
+  pedidosCreados  Pedido[]  @relation("CajeroCreador")
+  entregas        Entrega[]
+  movimientosStock MovimientoStock[]
+  qrConsumosCreados QRConsumo[]
+  
+  @@index([rol, activo])
+  @@index([activo])
+}
+
+enum Rol {
+  ADMIN
+  SUPERVISOR
+  CAJA
+  BARRA
+  INVENTARIO
+}
+
+model Evento {
+  id            String      @id @default(cuid())
+  nombre        String
+  fecha         DateTime
+  activo        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relaciones
+  pedidos       Pedido[]
+  barras        Barra[]
+  cajas         Caja[]
+  stockLocations StockLocation[]
+  cierresEvento CierreEvento[]
+  qrConsumos    QRConsumo[]
+  
+  @@index([activo, fecha])
+  @@index([fecha])
+}
+
+model Caja {
+  id            String      @id @default(cuid())
+  nombre        String      // "Caja 1", "Caja Principal"
+  eventoId      String
+  activo        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  
+  // Relaciones
+  evento        Evento      @relation(fields: [eventoId], references: [id])
+  pedidos       Pedido[]
+  
+  @@index([eventoId, activo])
+  @@index([eventoId])
+}
+
+model Barra {
+  id            String      @id @default(cuid())
+  nombre        String      // "Barra 1", "Barra VIP"
+  eventoId      String
+  activa        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  
+  // Relaciones
+  evento        Evento      @relation(fields: [eventoId], references: [id])
+  entregas      Entrega[]
+  stockLocation StockLocation?
+  
+  @@index([eventoId, activa])
+  @@index([eventoId])
+}
+
+model Producto {
+  id            String      @id @default(cuid())
+  codigo        String      @unique
+  nombre        String
+  descripcion   String?
+  precio        Decimal     @db.Decimal(10, 2)
+  categoria     String?
+  activo        Boolean     @default(true)
+  
+  // Tipo de producto: SIMPLE (venta directa), BASE (insumo/componente), COMPUESTO (tiene receta)
+  tipo          TipoProducto @default(SIMPLE)
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relaciones
+  pedidoItems   PedidoItem[]
+  stock         Stock[]
+  movimientosStock MovimientoStock[]
+  
+  // Receta: este producto está compuesto de...
+  receta        ProductoReceta[] @relation("ProductoPadre")
+  
+  // Este producto es componente de...
+  componenteDe  ProductoReceta[] @relation("ProductoComponente")
+  
+  @@index([tipo, activo])
+  @@index([categoria, activo])
+  @@index([activo])
+}
+
+enum TipoProducto {
+  SIMPLE      // Producto final que se vende y se descuenta directamente (ej: Speed solo)
+  BASE        // Insumo/componente que no se vende solo (ej: botella vacía, speed)
+  COMPUESTO   // Producto que tiene receta y se arma de componentes (ej: Smirnoff + 5 Speed)
+}
+
+model ProductoReceta {
+  id            String      @id @default(cuid())
+  
+  // Producto padre (el compuesto)
+  productoId    String
+  producto      Producto    @relation("ProductoPadre", fields: [productoId], references: [id], onDelete: Cascade)
+  
+  // Componente necesario
+  componenteId  String
+  componente    Producto    @relation("ProductoComponente", fields: [componenteId], references: [id], onDelete: Cascade)
+  
+  cantidad      Int         // Cantidad de este componente necesaria
+  opcional      Boolean     @default(false) // Si es opcional (ej: elegir entre Speed o Jugo)
+  grupoOpcion   String?     // Para agrupar opciones (ej: "acompañamiento")
+  
+  createdAt     DateTime    @default(now())
+  
+  @@unique([productoId, componenteId])
+  @@index([productoId])
+  @@index([componenteId])
+}
+
+model Pedido {
+  id            String      @id @default(cuid())
+  codigo        String      @unique  // P-20260126-0001
+  qrToken       String      @unique  // Token opaco para QR
+  
+  eventoId      String
+  cajaId        String
+  cajeroId      String
+  
+  // Estados
+  estadoPago    EstadoPago  @default(PENDING_PAYMENT)
+  estadoPedido  EstadoPedido @default(PENDING_DELIVERY)
+  
+  // Montos
+  subtotal      Decimal     @db.Decimal(10, 2)
+  total         Decimal     @db.Decimal(10, 2)
+  
+  metodoPago    MetodoPago
+  qrConsumoId   String?     // ID del QR de consumo usado (si aplica)
+  
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  fechaPago     DateTime?
+  fechaEntregaCompleta DateTime?
+  
+  // Aprobación de transferencias
+  aprobadoPor   String?
+  fechaAprobacion DateTime?
+  
+  // Relaciones
+  evento        Evento      @relation(fields: [eventoId], references: [id])
+  caja          Caja        @relation(fields: [cajaId], references: [id])
+  cajero        Usuario     @relation("CajeroCreador", fields: [cajeroId], references: [id])
+  qrConsumo     QRConsumo?  @relation(fields: [qrConsumoId], references: [id])
+  items         PedidoItem[]
+  entregas      Entrega[]
+  
+  @@index([eventoId, estadoPedido])
+  @@index([eventoId, estadoPago])
+  @@index([eventoId, createdAt])
+  @@index([estadoPago, estadoPedido])
+  @@index([qrToken])
+  @@index([cajaId])
+  @@index([cajeroId])
+}
+
+enum MetodoPago {
+  CASH
+  TRANSFER
+  QR_CONSUMO  // Pago con QR de consumo
+}
+
+enum EstadoPago {
+  PENDING_PAYMENT   // Transferencia pendiente
+  PAID              // Pagado (cash o transfer aprobada)
+  REJECTED          // Transferencia rechazada
+}
+
+enum EstadoPedido {
+  PENDING_DELIVERY  // Ningún item entregado
+  PARTIAL_DELIVERY  // Algunos items entregados parcialmente
+  DELIVERED         // Todos los items entregados completamente
+  CANCELLED         // Cancelado
+}
+
+model PedidoItem {
+  id            String      @id @default(cuid())
+  pedidoId      String
+  productoId    String
+  
+  cantidad      Int
+  precioUnitario Decimal    @db.Decimal(10, 2)
+  subtotal      Decimal     @db.Decimal(10, 2)
+  
+  // Opciones de componentes (para combos)
+  // JSON: { "acompañamiento": "BASE-SPE001" } - indica qué componente se eligió para cada grupo opcional
+  opcionesComponentes Json?
+  
+  // Control de entrega
+  cantidadEntregada Int     @default(0)
+  estadoItem    EstadoItem  @default(PENDING)
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relaciones
+  pedido        Pedido      @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  producto      Producto    @relation(fields: [productoId], references: [id])
+  entregas      EntregaDetalle[]
+  
+  @@index([pedidoId, estadoItem])
+  @@index([productoId])
+  @@index([estadoItem])
+}
+
+enum EstadoItem {
+  PENDING       // Sin entregar
+  PARTIAL       // Parcialmente entregado
+  DELIVERED     // Totalmente entregado
+}
+
+model Entrega {
+  id            String      @id @default(cuid())
+  pedidoId      String
+  barraId       String
+  bartenderId   String
+  
+  notas         String?
+  createdAt     DateTime    @default(now())
+  
+  // Relaciones
+  pedido        Pedido      @relation(fields: [pedidoId], references: [id])
+  barra         Barra       @relation(fields: [barraId], references: [id])
+  bartender     Usuario     @relation(fields: [bartenderId], references: [id])
+  detalles      EntregaDetalle[]
+  
+  @@index([pedidoId])
+  @@index([barraId, createdAt])
+  @@index([bartenderId])
+}
+
+model EntregaDetalle {
+  id            String      @id @default(cuid())
+  entregaId     String
+  pedidoItemId  String
+  
+  cantidadEntregada Int
+  
+  createdAt     DateTime    @default(now())
+  
+  // Relaciones
+  entrega       Entrega     @relation(fields: [entregaId], references: [id], onDelete: Cascade)
+  pedidoItem    PedidoItem  @relation(fields: [pedidoItemId], references: [id])
+  
+  @@index([entregaId])
+  @@index([pedidoItemId])
+}
+
+// --- INVENTARIO ---
+
+model StockLocation {
+  id            String      @id @default(cuid())
+  nombre        String      // "Depósito Central", "Barra 1"
+  tipo          TipoLocation
+  eventoId      String
+  barraId       String?     @unique
+  
+  activo        Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  
+  // Relaciones
+  evento        Evento      @relation(fields: [eventoId], references: [id])
+  barra         Barra?      @relation(fields: [barraId], references: [id])
+  stock         Stock[]
+  movimientosOrigen MovimientoStock[] @relation("Origen")
+  movimientosDestino MovimientoStock[] @relation("Destino")
+  
+  @@index([eventoId])
+}
+
+enum TipoLocation {
+  DEPOSITO
+  BARRA
+}
+
+model Stock {
+  id            String      @id @default(cuid())
+  productoId    String
+  locationId    String
+  
+  cantidad      Int         @default(0)
+  reservado     Int         @default(0)  // Para estrategia C
+  umbralBajo    Int?        // Alerta stock bajo
+  
+  updatedAt     DateTime    @updatedAt
+  
+  // Relaciones
+  producto      Producto    @relation(fields: [productoId], references: [id])
+  location      StockLocation @relation(fields: [locationId], references: [id])
+  
+  @@unique([productoId, locationId])
+  @@index([locationId, productoId])
+  @@index([productoId])
+}
+
+model MovimientoStock {
+  id            String      @id @default(cuid())
+  productoId    String
+  tipo          TipoMovimiento
+  cantidad      Int
+  
+  // Ubicaciones
+  origenId      String?
+  destinoId     String?
+  
+  // Referencias
+  pedidoId      String?
+  entregaId     String?
+  usuarioId     String
+  
+  motivo        String?
+  notas         String?
+  
+  createdAt     DateTime    @default(now())
+  
+  // Relaciones
+  producto      Producto    @relation(fields: [productoId], references: [id])
+  origen        StockLocation? @relation("Origen", fields: [origenId], references: [id])
+  destino       StockLocation? @relation("Destino", fields: [destinoId], references: [id])
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id])
+  
+  @@index([productoId, createdAt])
+  @@index([origenId])
+  @@index([destinoId])
+  @@index([tipo, createdAt])
+  @@index([usuarioId])
+}
+
+enum TipoMovimiento {
+  INBOUND           // Ingreso al depósito
+  TRANSFER          // Entre ubicaciones
+  SALE_RESERVE      // Reserva por venta (estrategia C)
+  DELIVERY_COMMIT   // Decremento por entrega
+  WASTE             // Merma/rotura
+  ADJUSTMENT        // Ajuste de inventario
+  RETURN            // Devolución
+}
+
+model CierreEvento {
+  id            String      @id @default(cuid())
+  eventoId      String
+  locationId    String?     // null = cierre general del evento
+  
+  stockTeorico  Json        // { productoId: cantidad }
+  stockReal     Json        // { productoId: cantidad }
+  varianzas     Json        // { productoId: diferencia }
+  motivos       Json?       // { productoId: "razón" }
+  
+  realizadoPor  String
+  createdAt     DateTime    @default(now())
+  
+  // Relaciones
+  evento        Evento      @relation(fields: [eventoId], references: [id])
+  
+  @@index([eventoId])
+}
+
+// --- QR DE CONSUMO ---
+
+model QRConsumo {
+  id            String      @id @default(cuid())
+  codigo        String      @unique  // QRC-20260126-0001
+  qrToken       String      @unique  // Token para el QR
+  
+  eventoId      String
+  creadoPorId   String      // Admin que lo creó
+  
+  // Montos
+  montoInicial  Decimal     @db.Decimal(10, 2)
+  saldoActual   Decimal     @db.Decimal(10, 2)
+  
+  // Estado
+  estado        EstadoQRConsumo @default(ACTIVO)
+  
+  // Opcional: para identificar al cliente
+  nombreCliente String?
+  notas         String?
+  
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  fechaExpiracion DateTime?
+  
+  // Relaciones
+  evento        Evento      @relation(fields: [eventoId], references: [id])
+  creadoPor     Usuario     @relation(fields: [creadoPorId], references: [id])
+  transacciones TransaccionQRConsumo[]
+  pedidos       Pedido[]
+  
+  @@index([eventoId, estado])
+  @@index([qrToken])
+  @@index([estado])
+}
+
+enum EstadoQRConsumo {
+  ACTIVO        // Puede usarse
+  AGOTADO       // Saldo = 0
+  BLOQUEADO     // Bloqueado manualmente
+  EXPIRADO      // Pasó la fecha de expiración
+}
+
+model TransaccionQRConsumo {
+  id            String      @id @default(cuid())
+  qrConsumoId   String
+  pedidoId      String?     // Si fue usado en un pedido
+  
+  tipo          TipoTransaccionQR
+  monto         Decimal     @db.Decimal(10, 2)
+  saldoAnterior Decimal     @db.Decimal(10, 2)
+  saldoNuevo    Decimal     @db.Decimal(10, 2)
+  
+  descripcion   String?
+  realizadoPor  String      // Usuario que hizo la transacción
+  
+  createdAt     DateTime    @default(now())
+  
+  // Relaciones
+  qrConsumo     QRConsumo   @relation(fields: [qrConsumoId], references: [id])
+  
+  @@index([qrConsumoId])
+  @@index([createdAt])
+}
+
+enum TipoTransaccionQR {
+  CARGA         // Agregar saldo
+  CONSUMO       // Usar saldo en un pedido
+  AJUSTE        // Ajuste manual
+  DEVOLUCION    // Devolución de pedido cancelado
+}

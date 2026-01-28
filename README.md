@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍺 Sistema de Gestión de Bar para Eventos
 
-## Getting Started
+Sistema web responsive (mobile-first) para gestionar operaciones de bar en eventos con múltiples POS, control de inventario, pagos y QR único por pedido.
 
-First, run the development server:
+## 🚀 Stack
+
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes + PostgreSQL + Prisma
+- **Deploy**: Render.com + Neon PostgreSQL (ambos gratis)
+
+## 📋 Requisitos
+
+- Node.js 20.19+
+- PostgreSQL (Neon recomendado)
+
+## ⚡ Instalación Rápida
 
 ```bash
+# 1. Instalar dependencias
+npm install
+
+# 2. Configurar variables de entorno
+cp .env.example .env.local
+# Edita .env.local con tu connection string de Neon
+
+# 3. Configurar base de datos (Neon recomendado)
+npx prisma db push
+
+# 4. Cargar carta completa del bar
+npm run db:reset
+
+# 5. Iniciar servidor
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 👥 Usuarios de Prueba
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Después del seed, puedes usar estos usuarios:
 
-## Learn More
+| Rol | Email | Password |
+|-----|-------|----------|
+| Admin | admin@bar.com | admin123 |
+| Cajero | cajero1@bar.com | cajero123 |
+| Bartender | bartender1@bar.com | barra123 |
 
-To learn more about Next.js, take a look at the following resources:
+## 🏗️ Arquitectura
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/api/           # API REST (eventos, pedidos, entregas, pagos, inventario)
+app/(auth)/        # UI protegidas (caja, barra, admin)
+lib/               # Lógica de negocio (auth, inventory, qr)
+prisma/            # Schema + seed
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 📦 Sistema de Productos y Combos
 
-## Deploy on Vercel
+El sistema maneja **3 tipos de productos**:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **BASE**: Insumos/componentes (botellas, speed, jugos) - No se venden solos
+- **SIMPLE**: Productos de venta individual (agua, speed suelto)
+- **COMPUESTO**: Combos con recetas configurables (Smirnoff + 5 Speed/2 Jugos)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+### Flujo de Negocio
+
+1. **Caja** crea pedido → Reserva stock
+2. **Admin** aprueba transferencia (si aplica)
+3. **Cliente** recibe QR único
+4. **Bartender** escanea QR → Entrega items → Decrementa stock
+
+## 🔐 API Endpoints
+
+**Auth**: `/api/auth/login`, `/api/auth/me`  
+**Pedidos**: `/api/pedidos`, `/api/qr/[token]`  
+**Entregas**: `/api/entregas`  
+**Pagos**: `/api/pagos/pendientes`, `/api/pagos/[id]/aprobar`  
+**Inventario**: `/api/inventario/stock`, `/api/inventario/movimientos`  
+**Eventos**: `/api/eventos`, `/api/productos`
+
+## 🚢 Deploy Gratis en Render
+
+1. **Database**: Crea DB gratuita en [neon.tech](https://neon.tech)
+2. **Web Service**: 
+   - Conecta repo en [render.com](https://render.com)
+   - Build: `npm install && npx prisma generate && npm run build`
+   - Start: `npm start`
+   - Variables: `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`
+3. **Seed**: Ejecuta `npx prisma db push && npm run prisma:seed` desde Shell de Render
+
+**Opcional**: Usa [UptimeRobot](https://uptimerobot.com/) para evitar que se duerma el servicio
+
+## 📊 Scripts
+
+```bash
+npm run dev          # Desarrollo con HTTPS
+npm run build        # Build producción
+npm run db:studio    # UI visual para DB (localhost:5555)
+npm run db:seed      # Cargar carta completa (limpia y recarga)
+npm run db:migrate   # Ejecutar migraciones
+```
+
+## 🐛 Troubleshooting
+
+**"Prisma Client no generado"**: `npx prisma generate`  
+**Error de conexión DB**: Verifica `DATABASE_URL` en `.env.local`  
+**Puerto 3000 en uso**: `PORT=3001 npm run dev`
+
+---
+
+**Desarrollado para gestión profesional de bar en eventos**
