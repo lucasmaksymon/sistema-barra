@@ -342,7 +342,7 @@ export default function BarraPage() {
         
         // Obtener el ID del dispositivo de video
         const videoTrack = stream.getVideoTracks()[0];
-        const deviceId = videoTrack.getSettings().deviceId;
+        const deviceId = videoTrack.getSettings().deviceId || null;
         
         await reader.decodeFromVideoDevice(
           deviceId,
