@@ -30,7 +30,7 @@ export async function createJWT(payload: JWTPayload): Promise<string> {
 export async function verifyJWT(token: string): Promise<JWTPayload> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as JWTPayload;
+    return payload as unknown as JWTPayload;
   } catch (error) {
     throw new Error('Token inválido o expirado');
   }
