@@ -122,8 +122,13 @@ export async function GET(request: NextRequest) {
       data: productosFormateados,
     });
   } catch (error) {
+    console.error('Error en GET /api/productos:', error);
     return NextResponse.json(
-      { success: false, error: 'Error interno del servidor' },
+      { 
+        success: false, 
+        error: 'Error interno del servidor',
+        details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+      },
       { status: 500 }
     );
   }
