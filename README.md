@@ -65,10 +65,12 @@ El sistema maneja **3 tipos de productos**:
 
 ### Flujo de Negocio
 
-1. **Caja** crea pedido → Reserva stock
+1. **Caja** crea pedido → ~~Reserva stock~~ **(CONTROL DE STOCK DESHABILITADO)**
 2. **Admin** aprueba transferencia (si aplica)
 3. **Cliente** recibe QR único
-4. **Bartender** escanea QR → Entrega items → Decrementa stock
+4. **Bartender** escanea QR → Entrega items → ~~Decrementa stock~~ **(CONTROL DE STOCK DESHABILITADO)**
+
+> ⚠️ **NOTA**: El control de inventario está temporalmente deshabilitado. Los pedidos no validan ni actualizan stock.
 
 ## 🔐 API Endpoints
 

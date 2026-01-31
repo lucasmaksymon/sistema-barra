@@ -9,6 +9,7 @@ type TransactionClient = Omit<
 /**
  * Valida y reserva stock para un producto (simple o compuesto)
  * Si es compuesto, valida y reserva los componentes
+ * DESHABILITADO: Solo valida opciones de combos, no verifica stock
  */
 export async function validarYReservarStock(
   tx: TransactionClient,
@@ -33,13 +34,13 @@ export async function validarYReservarStock(
     throw new Error('Producto no encontrado');
   }
 
-  // Si es SIMPLE, validar y reservar directamente
+  // Si es SIMPLE, solo retornar (stock deshabilitado)
   if (producto.tipo === 'SIMPLE') {
-    await validarYReservarProductoSimple(tx, productoId, cantidad, locationId);
+    // CONTROL DE STOCK DESHABILITADO - No valida ni reserva
     return;
   }
 
-  // Si es COMPUESTO, validar y reservar componentes
+  // Si es COMPUESTO, solo validar opciones (no stock)
   if (producto.tipo === 'COMPUESTO') {
     if (producto.receta.length === 0) {
       throw new Error(`El producto ${producto.nombre} no tiene receta configurada`);
@@ -82,24 +83,10 @@ export async function validarYReservarStock(
         );
       }
 
-      // Validar y reservar el componente elegido
-      await validarYReservarProductoSimple(
-        tx,
-        componenteElegido.componenteId,
-        componenteElegido.cantidad * cantidad,
-        locationId
-      );
+      // CONTROL DE STOCK DESHABILITADO - No valida ni reserva componentes
     }
 
-    // Validar y reservar componentes obligatorios
-    for (const recetaItem of componentesObligatorios) {
-      await validarYReservarProductoSimple(
-        tx,
-        recetaItem.componenteId,
-        recetaItem.cantidad * cantidad,
-        locationId
-      );
-    }
+    // CONTROL DE STOCK DESHABILITADO - No valida ni reserva componentes obligatorios
 
     return;
   }
@@ -114,6 +101,7 @@ export async function validarYReservarStock(
 
 /**
  * Valida y reserva stock de un producto simple
+ * DESHABILITADO: No hace nada
  */
 async function validarYReservarProductoSimple(
   tx: TransactionClient,
@@ -121,6 +109,10 @@ async function validarYReservarProductoSimple(
   cantidad: number,
   locationId: string
 ): Promise<void> {
+  // CONTROL DE STOCK DESHABILITADO - No hace nada
+  return;
+  
+  /* CÓDIGO ORIGINAL COMENTADO
   const stockDisponible = await tx.stock.findUnique({
     where: {
       productoId_locationId: {
@@ -161,6 +153,7 @@ async function validarYReservarProductoSimple(
       },
     },
   });
+  */
 }
 
 /**

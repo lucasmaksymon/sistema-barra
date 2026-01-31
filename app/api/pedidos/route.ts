@@ -123,7 +123,8 @@ export async function POST(request: NextRequest) {
     const codigo = generatePedidoCodigo(todayPedidos + 1);
     const qrToken = generateQRToken();
 
-    // Obtener ubicación de stock del evento
+    // CONTROL DE STOCK DESHABILITADO
+    // Obtener ubicación de stock del evento (opcional ahora)
     const stockLocation = await prisma.stockLocation.findFirst({
       where: { 
         eventoId, 
@@ -131,18 +132,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!stockLocation) {
-      return NextResponse.json(
-        { success: false, error: 'No hay ubicación de stock disponible' },
-        { status: 400 }
-      );
-    }
-
-    const locationId = stockLocation.id;
+    const locationId = stockLocation?.id || 'dummy-location-id';
 
     // Crear pedido con transacción
     const pedido = await prisma.$transaction(async (tx) => {
-      // Verificar y reservar stock para cada item (combos o simples)
+      // Validar opciones de combos (stock deshabilitado)
       for (const item of items) {
         await validarYReservarStock(
           tx,

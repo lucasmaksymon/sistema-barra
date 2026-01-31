@@ -303,57 +303,21 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* Stock Bajo */}
-        <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] border-2 border-red-500/30 rounded-xl p-6 shadow-lg">
+        {/* Stock Bajo - DESHABILITADO */}
+        <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] border-2 border-gray-700 rounded-xl p-6 shadow-lg opacity-50">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <span className="text-2xl">⚠️</span>
               Stock Bajo
             </h2>
-            {stockBajo.length > 0 && (
-              <span className="bg-gradient-to-r from-red-500/30 to-orange-500/30 text-red-400 px-4 py-2 rounded-xl font-bold text-lg border-2 border-red-500/50 shadow-lg">
-                {stockBajo.length}
-              </span>
-            )}
+            <span className="bg-gray-700 text-gray-400 px-3 py-1 rounded-lg text-sm font-semibold">
+              DESHABILITADO
+            </span>
           </div>
-
-          {stockBajo.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              Stock en niveles normales
-            </div>
-          ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-hide">
-              {stockBajo.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-red-500/10 border border-red-500/30 rounded-lg p-4"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-bold text-white">
-                        {item.producto.nombre}
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        {item.location.nombre}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-bold text-red-400">
-                        {item.disponible}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        Umbral: {item.umbralBajo}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-xs text-gray-400">
-                    <span className="font-semibold">Stock:</span> {item.cantidad} |{' '}
-                    <span className="font-semibold">Reservado:</span> {item.reservado}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="text-center py-8 text-gray-500">
+            <p className="mb-2">Control de stock deshabilitado</p>
+            <p className="text-xs text-gray-600">Las alertas de stock no están activas</p>
+          </div>
         </div>
       </div>
 

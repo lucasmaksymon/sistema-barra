@@ -131,20 +131,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obtener ubicación de stock del evento
+    // CONTROL DE STOCK DESHABILITADO
+    // Obtener ubicación de stock del evento (opcional ahora)
     const stockLocation = await prisma.stockLocation.findFirst({
       where: { 
         eventoId: barra.eventoId,
         activo: true 
       },
     });
-
-    if (!stockLocation) {
-      return NextResponse.json(
-        { success: false, error: 'No hay ubicación de stock disponible' },
-        { status: 400 }
-      );
-    }
 
     // Procesar entrega en transacción
     const resultado = await prisma.$transaction(async (tx) => {
@@ -202,7 +196,10 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        // Actualizar stock según el tipo de producto
+        // CONTROL DE STOCK DESHABILITADO
+        // No se actualiza el stock en las entregas
+        
+        /* CÓDIGO ORIGINAL COMENTADO - Actualizar stock según el tipo de producto
         if (pedidoItem.producto.tipo === 'COMPUESTO') {
           // Para combos: actualizar stock de cada componente BASE
           if (pedidoItem.producto.receta && pedidoItem.producto.receta.length > 0) {
@@ -275,6 +272,7 @@ export async function POST(request: NextRequest) {
             },
           });
         }
+        */
       }
 
       // Verificar si todos los items están entregados

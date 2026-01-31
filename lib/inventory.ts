@@ -3,12 +3,17 @@ import { TipoMovimiento } from '@prisma/client';
 
 /**
  * Verifica si hay stock disponible suficiente
+ * DESHABILITADO: Siempre retorna true
  */
 export async function verificarStockDisponible(
   productoId: string,
   locationId: string,
   cantidadRequerida: number
 ): Promise<boolean> {
+  // CONTROL DE STOCK DESHABILITADO
+  return true;
+  
+  /* CÓDIGO ORIGINAL COMENTADO
   const stock = await prisma.stock.findUnique({
     where: {
       productoId_locationId: {
@@ -24,10 +29,12 @@ export async function verificarStockDisponible(
 
   const disponible = stock.cantidad - stock.reservado;
   return disponible >= cantidadRequerida;
+  */
 }
 
 /**
  * Reserva stock al crear un pedido (Estrategia C)
+ * DESHABILITADO: No hace nada
  */
 export async function reservarStock(
   productoId: string,
@@ -36,6 +43,10 @@ export async function reservarStock(
   usuarioId: string,
   pedidoId?: string
 ) {
+  // CONTROL DE STOCK DESHABILITADO - No hace nada
+  return;
+  
+  /* CÓDIGO ORIGINAL COMENTADO
   // Verificar disponibilidad
   const disponible = await verificarStockDisponible(productoId, locationId, cantidad);
   
@@ -70,10 +81,12 @@ export async function reservarStock(
       motivo: 'Reserva por venta',
     },
   });
+  */
 }
 
 /**
  * Confirma la entrega y decrementa el stock (Estrategia C)
+ * DESHABILITADO: No hace nada
  */
 export async function confirmarEntrega(
   productoId: string,
@@ -83,6 +96,10 @@ export async function confirmarEntrega(
   pedidoId: string,
   entregaId: string
 ) {
+  // CONTROL DE STOCK DESHABILITADO - No hace nada
+  return;
+  
+  /* CÓDIGO ORIGINAL COMENTADO
   // Actualizar stock: decrementar cantidad y reservado
   await prisma.stock.update({
     where: {
@@ -114,10 +131,12 @@ export async function confirmarEntrega(
       motivo: 'Entrega confirmada',
     },
   });
+  */
 }
 
 /**
  * Libera stock reservado al cancelar un pedido
+ * DESHABILITADO: No hace nada
  */
 export async function liberarStockReservado(
   productoId: string,
@@ -126,6 +145,10 @@ export async function liberarStockReservado(
   usuarioId: string,
   pedidoId: string
 ) {
+  // CONTROL DE STOCK DESHABILITADO - No hace nada
+  return;
+  
+  /* CÓDIGO ORIGINAL COMENTADO
   // Decrementar reservado
   await prisma.stock.update({
     where: {
@@ -153,6 +176,7 @@ export async function liberarStockReservado(
       motivo: 'Liberación por cancelación',
     },
   });
+  */
 }
 
 /**

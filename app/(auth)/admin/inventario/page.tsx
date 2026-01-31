@@ -35,6 +35,9 @@ export default function InventarioAdminPage() {
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
   
+  // CONTROL DE STOCK DESHABILITADO
+  const STOCK_DESHABILITADO = true;
+  
   // Filtros
   const [busqueda, setBusqueda] = useState('');
   const [filtroAlerta, setFiltroAlerta] = useState('todos');
@@ -277,6 +280,20 @@ export default function InventarioAdminPage() {
         </div>
       </div>
 
+      {/* Aviso de Stock Deshabilitado */}
+      {STOCK_DESHABILITADO && (
+        <div className="mb-4 p-6 rounded-xl border-2 bg-yellow-500/10 border-yellow-500/50">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-3xl">⚠️</span>
+            <h2 className="text-xl font-bold text-yellow-400">Control de Stock DESHABILITADO</h2>
+          </div>
+          <p className="text-yellow-300 text-sm ml-11">
+            El sistema de control de inventario está temporalmente deshabilitado. Los pedidos no validarán ni actualizarán stock.
+            Esta página muestra datos históricos solamente.
+          </p>
+        </div>
+      )}
+
       {/* Mensaje */}
       {mensaje.texto && (
         <div
@@ -464,13 +481,15 @@ export default function InventarioAdminPage() {
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={() => abrirModalAjuste(item)}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md flex items-center justify-center gap-2"
+                    disabled={STOCK_DESHABILITADO}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 disabled:transform-none text-sm shadow-md flex items-center justify-center gap-2"
                   >
                     📝 Ajustar Stock
                   </button>
                   <button
                     onClick={() => abrirModalUmbral(item)}
-                    className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md"
+                    disabled={STOCK_DESHABILITADO}
+                    className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 disabled:transform-none text-sm shadow-md"
                     title="Cambiar umbral de alerta"
                   >
                     ⚙️
