@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   // Optimizaciones de rendimiento
   reactStrictMode: true,
   
+  // Configuración de Turbopack (Next.js 16+)
+  // Silencia el warning de webpack config de next-pwa
+  turbopack: {},
+  
   // Optimización de imágenes
   images: {
     formats: ['image/avif', 'image/webp'],
