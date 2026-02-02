@@ -61,7 +61,7 @@ export default function AdminPage() {
     try {
       // Optimización: cargar todo en paralelo
       const [resPedidos, resPagos, resStock] = await Promise.all([
-        fetch(`/api/pedidos?eventoId=${eventoSeleccionado}`, {
+        fetch(`/api/pedidos?eventoId=${eventoSeleccionado}&limit=99999`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch('/api/pagos/pendientes', {
@@ -217,7 +217,7 @@ export default function AdminPage() {
             <div className="text-2xl">💰</div>
           </div>
           <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">
-            ${stats.totalVentas.toFixed(0)}
+            ${stats.totalVentas.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
           </div>
           <div className="text-xs text-gray-400">Ingresos generados</div>
         </div>
