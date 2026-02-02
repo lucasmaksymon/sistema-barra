@@ -73,7 +73,7 @@ export default function ReportesAdminPage() {
     setLoading(true);
     
     try {
-      const res = await fetch(`/api/pedidos?eventoId=${eventoSeleccionado}`, {
+      const res = await fetch(`/api/pedidos?eventoId=${eventoSeleccionado}&limit=99999`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -189,7 +189,7 @@ export default function ReportesAdminPage() {
                 <div className="text-2xl">💰</div>
               </div>
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-                ${reporte.totalVentas.toFixed(0)}
+                ${reporte.totalVentas.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             </div>
 
@@ -207,7 +207,7 @@ export default function ReportesAdminPage() {
                 <div className="text-2xl">🎫</div>
               </div>
               <div className="text-4xl font-bold text-purple-400">
-                ${reporte.ticketPromedio.toFixed(0)}
+                ${reporte.ticketPromedio.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             </div>
           </div>
@@ -220,21 +220,21 @@ export default function ReportesAdminPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-[#0f1419] rounded-lg p-4">
                 <div className="text-sm text-gray-400 mb-1">💵 Efectivo</div>
-                <div className="text-2xl font-bold text-green-400">${reporte.metodoPago.CASH.toFixed(0)}</div>
+                <div className="text-2xl font-bold text-green-400">${reporte.metodoPago.CASH.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                 <div className="text-xs text-gray-500 mt-1">
                   {reporte.totalVentas > 0 ? ((reporte.metodoPago.CASH / reporte.totalVentas) * 100).toFixed(1) : 0}%
                 </div>
               </div>
               <div className="bg-[#0f1419] rounded-lg p-4">
                 <div className="text-sm text-gray-400 mb-1">🏦 Transferencia</div>
-                <div className="text-2xl font-bold text-blue-400">${reporte.metodoPago.TRANSFER.toFixed(0)}</div>
+                <div className="text-2xl font-bold text-blue-400">${reporte.metodoPago.TRANSFER.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                 <div className="text-xs text-gray-500 mt-1">
                   {reporte.totalVentas > 0 ? ((reporte.metodoPago.TRANSFER / reporte.totalVentas) * 100).toFixed(1) : 0}%
                 </div>
               </div>
               <div className="bg-[#0f1419] rounded-lg p-4">
                 <div className="text-sm text-gray-400 mb-1">🎫 QR Consumo</div>
-                <div className="text-2xl font-bold text-purple-400">${reporte.metodoPago.QR_CONSUMO.toFixed(0)}</div>
+                <div className="text-2xl font-bold text-purple-400">${reporte.metodoPago.QR_CONSUMO.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                 <div className="text-xs text-gray-500 mt-1">
                   {reporte.totalVentas > 0 ? ((reporte.metodoPago.QR_CONSUMO / reporte.totalVentas) * 100).toFixed(1) : 0}%
                 </div>
@@ -253,7 +253,7 @@ export default function ReportesAdminPage() {
                   <div key={cat.categoria} className="bg-[#0f1419] rounded-lg p-4">
                     <div className="flex justify-between items-center mb-2">
                       <div className="font-semibold text-white">{cat.categoria}</div>
-                      <div className="text-lg font-bold text-green-400">${cat.total.toFixed(0)}</div>
+                      <div className="text-lg font-bold text-green-400">${cat.total.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                     </div>
                     <div className="text-sm text-gray-400">{cat.cantidad} pedidos</div>
                   </div>
@@ -275,7 +275,7 @@ export default function ReportesAdminPage() {
                         <div className="font-semibold text-white">{prod.nombre}</div>
                         <div className="text-sm text-gray-400">{prod.cantidad} unidades</div>
                       </div>
-                      <div className="text-lg font-bold text-green-400">${prod.total.toFixed(0)}</div>
+                      <div className="text-lg font-bold text-green-400">${prod.total.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                     </div>
                   </div>
                 ))}
