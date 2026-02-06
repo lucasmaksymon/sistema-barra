@@ -7,7 +7,6 @@ interface MenuItem {
   icon: string;
   label: string;
   path: string;
-  color: string;
   badge?: number;
 }
 
@@ -25,55 +24,46 @@ export default function AdminLayout({
       icon: '📊',
       label: 'Dashboard',
       path: '/admin',
-      color: 'from-blue-600 to-cyan-600',
     },
     {
       icon: '🍹',
       label: 'Productos',
       path: '/admin/productos',
-      color: 'from-indigo-600 to-purple-600',
     },
     {
       icon: '🎁',
       label: 'Combos',
       path: '/admin/combos',
-      color: 'from-pink-600 to-rose-600',
     },
     {
       icon: '📦',
       label: 'Inventario',
       path: '/admin/inventario',
-      color: 'from-green-600 to-emerald-600',
     },
     {
       icon: '🎫',
       label: 'QR Consumo',
       path: '/admin/qr-consumo',
-      color: 'from-purple-600 to-pink-600',
     },
     {
       icon: '💳',
       label: 'Transacciones',
       path: '/admin/transacciones',
-      color: 'from-violet-600 to-fuchsia-600',
     },
     {
       icon: '📈',
       label: 'Reportes',
       path: '/admin/reportes',
-      color: 'from-amber-600 to-orange-600',
     },
     {
       icon: '👥',
       label: 'Usuarios',
       path: '/admin/usuarios',
-      color: 'from-rose-600 to-red-600',
     },
     {
       icon: '⚙️',
       label: 'Configuración',
       path: '/admin/configuracion',
-      color: 'from-teal-600 to-cyan-600',
     },
   ];
 
@@ -90,7 +80,7 @@ export default function AdminLayout({
       <aside
         className={`
           fixed inset-y-0 left-0 z-50
-          bg-gradient-to-b from-[#1a1f2e] to-[#0f1419]
+          bg-[#1a1f2e]
           border-r border-gray-800
           transition-all duration-300 ease-in-out
           ${sidebarOpen ? 'w-64' : 'w-20'}
@@ -101,7 +91,7 @@ export default function AdminLayout({
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
           {sidebarOpen ? (
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
                 <span className="text-xl">👨‍💼</span>
               </div>
               <div>
@@ -110,7 +100,7 @@ export default function AdminLayout({
               </div>
             </div>
           ) : (
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg mx-auto">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg mx-auto">
               <span className="text-xl">👨‍💼</span>
             </div>
           )}
@@ -138,7 +128,7 @@ export default function AdminLayout({
                   transition-all duration-200 group
                   ${
                     active
-                      ? `bg-gradient-to-r ${item.color} shadow-lg scale-105`
+                      ? 'bg-blue-600 shadow-lg scale-105'
                       : 'hover:bg-gray-800/50 hover:scale-105'
                   }
                   ${!sidebarOpen && 'justify-center'}

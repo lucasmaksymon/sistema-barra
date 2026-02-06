@@ -11,8 +11,17 @@ export function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [isIOSDevice, setIsIOSDevice] = useState(false);
 
   useEffect(() => {
+    // Indicar que estamos en el cliente
+    setIsClient(true);
+
+    // Verificar si es iOS
+    const checkIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOSDevice(checkIOS);
+
     // Verificar si ya está instalado
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
@@ -41,7 +50,7 @@ export function InstallPWA() {
   const handleInstall = async () => {
     if (!deferredPrompt) {
       // En iOS, mostrar instrucciones
-      if (isIOS()) {
+      if (isIOSDevice) {
         alert('Para instalar:\n1. Toca el botón Compartir ⬆️\n2. Selecciona "Agregar a pantalla de inicio"');
         return;
       }
@@ -59,9 +68,10 @@ export function InstallPWA() {
     setDeferredPrompt(null);
   };
 
-  const isIOS = () => {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-  };
+  // No renderizar nada hasta que estemos en el cliente
+  if (!isClient) {
+    return null;
+  }
 
   // No mostrar si ya está instalado
   if (isInstalled) {
@@ -69,7 +79,7 @@ export function InstallPWA() {
   }
 
   // Mostrar botón si es instalable O si es iOS
-  if (!isInstallable && !isIOS()) {
+  if (!isInstallable && !isIOSDevice) {
     return null;
   }
 

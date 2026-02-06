@@ -198,7 +198,7 @@ export default function ProductosAdminPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-bold text-white flex items-center gap-3 mb-2">
               🍹 Gestión de Productos
             </h1>
             <p className="text-gray-400 text-sm">Administra tu catálogo de productos, combos e insumos</p>
@@ -213,7 +213,7 @@ export default function ProductosAdminPage() {
             </button>
             <button
               onClick={abrirFormNuevo}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
             >
               + Nuevo Producto
             </button>
@@ -222,19 +222,19 @@ export default function ProductosAdminPage() {
 
         {/* Stats Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-          <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-500/30 rounded-lg p-3">
+          <div className="bg-blue-600/10 border border-blue-500/30 rounded-lg p-3">
             <div className="text-sm text-blue-300 mb-1">Total Productos</div>
             <div className="text-2xl font-bold text-white">{productos.length}</div>
           </div>
-          <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-lg p-3">
+          <div className="bg-green-600/10 border border-green-500/30 rounded-lg p-3">
             <div className="text-sm text-green-300 mb-1">🛒 Simples</div>
             <div className="text-2xl font-bold text-white">{productos.filter(p => p.tipo === 'SIMPLE' || !p.tipo).length}</div>
           </div>
-          <div className="bg-gradient-to-br from-orange-600/20 to-red-600/20 border border-orange-500/30 rounded-lg p-3">
+          <div className="bg-orange-600/10 border border-orange-500/30 rounded-lg p-3">
             <div className="text-sm text-orange-300 mb-1">📦 Insumos</div>
             <div className="text-2xl font-bold text-white">{productos.filter(p => p.tipo === 'BASE').length}</div>
           </div>
-          <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-500/30 rounded-lg p-3">
+          <div className="bg-purple-600/10 border border-purple-500/30 rounded-lg p-3">
             <div className="text-sm text-purple-300 mb-1">🎁 Combos</div>
             <div className="text-2xl font-bold text-white">{productos.filter(p => p.tipo === 'COMPUESTO').length}</div>
           </div>
@@ -382,7 +382,7 @@ export default function ProductosAdminPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
                 >
                   {loading ? 'Guardando...' : editando ? 'Actualizar' : 'Crear Producto'}
                 </button>
@@ -409,7 +409,7 @@ export default function ProductosAdminPage() {
 
         {loading && !mostrarForm ? (
           <div className="text-center py-16">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-500 mb-4"></div>
+            <div className="inline-block rounded-full h-12 w-12 border-b-4 border-blue-500 mb-4"></div>
             <p className="text-gray-400 font-semibold">Cargando productos...</p>
           </div>
         ) : productosFiltrados.length === 0 ? (
@@ -422,7 +422,7 @@ export default function ProductosAdminPage() {
             {productosFiltrados.map((producto) => (
               <div
                 key={producto.id}
-                className={`bg-gradient-to-br from-[#0f1419] to-[#1a1f2e] border-2 ${
+                className={`bg-[#1a1f2e] border-2 ${
                   producto.activo ? 'border-gray-700' : 'border-red-500/50'
                 } rounded-xl p-4 hover:border-blue-500/50 transition-all`}
               >
@@ -508,14 +508,14 @@ export default function ProductosAdminPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => abrirFormEditar(producto)}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md flex items-center justify-center gap-2"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md flex items-center justify-center gap-2"
                     title="Editar producto"
                   >
                     ✏️ Editar
                   </button>
                   <button
                     onClick={() => eliminarProducto(producto.id, producto.nombre)}
-                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md"
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md"
                     title="Eliminar producto"
                   >
                     🗑️

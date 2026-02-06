@@ -200,13 +200,13 @@ export default function UsuariosAdminPage() {
           >
             ← Volver al Dashboard
           </button>
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-red-400 flex items-center gap-3">
+          <h1 className="text-4xl font-bold text-white flex items-center gap-3">
             👥 Gestión de Usuarios
           </h1>
         </div>
         <button
           onClick={abrirFormNuevo}
-          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-lg"
         >
           + Nuevo Usuario
         </button>
@@ -227,27 +227,27 @@ export default function UsuariosAdminPage() {
 
       {/* Estadísticas */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-2 border-purple-500/30 rounded-xl p-4">
+        <div className="bg-purple-600/10 border-2 border-purple-500/30 rounded-xl p-4">
           <div className="text-xs text-purple-300 uppercase mb-1">Total</div>
           <div className="text-3xl font-bold text-white">{estadisticas.total}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-600/20 to-rose-600/20 border-2 border-red-500/30 rounded-xl p-4">
+        <div className="bg-red-600/10 border-2 border-red-500/30 rounded-xl p-4">
           <div className="text-xs text-red-300 uppercase mb-1">Admins</div>
           <div className="text-3xl font-bold text-white">{estadisticas.admin}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-2 border-blue-500/30 rounded-xl p-4">
+        <div className="bg-blue-600/10 border-2 border-blue-500/30 rounded-xl p-4">
           <div className="text-xs text-blue-300 uppercase mb-1">Cajeros</div>
           <div className="text-3xl font-bold text-white">{estadisticas.caja}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-2 border-green-500/30 rounded-xl p-4">
+        <div className="bg-green-600/10 border-2 border-green-500/30 rounded-xl p-4">
           <div className="text-xs text-green-300 uppercase mb-1">Bartenders</div>
           <div className="text-3xl font-bold text-white">{estadisticas.barra}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border-2 border-yellow-500/30 rounded-xl p-4">
+        <div className="bg-yellow-600/10 border-2 border-yellow-500/30 rounded-xl p-4">
           <div className="text-xs text-yellow-300 uppercase mb-1">Activos</div>
           <div className="text-3xl font-bold text-white">{estadisticas.activos}</div>
         </div>
@@ -363,7 +363,7 @@ export default function UsuariosAdminPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
                 >
                   {loading ? 'Guardando...' : editando ? 'Actualizar' : 'Crear Usuario'}
                 </button>
@@ -403,7 +403,7 @@ export default function UsuariosAdminPage() {
             {usuariosFiltrados.map((usuario) => (
               <div
                 key={usuario.id}
-                className={`bg-gradient-to-br from-[#0f1419] to-[#1a1f2e] border-2 ${
+                className={`bg-[#1a1f2e] border-2 ${
                   usuario.activo ? 'border-gray-700' : 'border-red-500/50'
                 } rounded-xl p-4 hover:border-blue-500/50 transition-all`}
               >

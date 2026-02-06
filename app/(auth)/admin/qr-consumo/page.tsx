@@ -76,7 +76,7 @@ export default function AdminQRConsumoPage() {
     setLoading(true);
     
     try {
-      const res = await fetch(`/api/qr-consumo?eventoId=${eventoSeleccionado}`, {
+      const res = await fetch(`/api/qr-consumo?eventoId=${eventoSeleccionado}&limit=1000`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -376,7 +376,7 @@ export default function AdminQRConsumoPage() {
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-4 border-blue-500 mb-3"></div>
+            <div className="inline-block rounded-full h-10 w-10 border-b-4 border-blue-500 mb-3"></div>
             <p className="text-gray-400 font-semibold">Cargando...</p>
           </div>
         ) : qrConsumos.length === 0 ? (

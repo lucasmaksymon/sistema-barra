@@ -73,7 +73,7 @@ export default function ReportesAdminPage() {
     setLoading(true);
     
     try {
-      const res = await fetch(`/api/pedidos?eventoId=${eventoSeleccionado}&limit=99999`, {
+      const res = await fetch(`/api/pedidos?eventoId=${eventoSeleccionado}&limit=1000`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -146,7 +146,7 @@ export default function ReportesAdminPage() {
         >
           ← Volver al Dashboard
         </button>
-        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400 flex items-center gap-3">
+        <h1 className="text-4xl font-bold text-white flex items-center gap-3">
           📊 Reportes y Análisis
         </h1>
       </div>
@@ -183,17 +183,17 @@ export default function ReportesAdminPage() {
         <>
           {/* Métricas Principales */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-2 border-green-500/30 rounded-xl p-6">
+            <div className="bg-green-600/10 border-2 border-green-500/30 rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm font-semibold text-green-300 uppercase">Ventas Totales</div>
                 <div className="text-2xl">💰</div>
               </div>
-              <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+              <div className="text-4xl font-bold text-green-400">
                 ${reporte.totalVentas.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-2 border-blue-500/30 rounded-xl p-6">
+            <div className="bg-blue-600/10 border-2 border-blue-500/30 rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm font-semibold text-blue-300 uppercase">Pedidos</div>
                 <div className="text-2xl">📋</div>
@@ -201,7 +201,7 @@ export default function ReportesAdminPage() {
               <div className="text-4xl font-bold text-white">{reporte.totalPedidos}</div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-2 border-purple-500/30 rounded-xl p-6">
+            <div className="bg-purple-600/10 border-2 border-purple-500/30 rounded-xl p-6">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-sm font-semibold text-purple-300 uppercase">Ticket Promedio</div>
                 <div className="text-2xl">🎫</div>

@@ -308,7 +308,7 @@ export default function CombosAdminPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-400 flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-bold text-white flex items-center gap-3 mb-2">
               🎁 Gestión de Combos
             </h1>
             <p className="text-gray-400 text-sm">Crea y edita combos con componentes y opciones</p>
@@ -323,7 +323,7 @@ export default function CombosAdminPage() {
             </button>
             <button
               onClick={abrirFormNuevo}
-              className="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
+              className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
             >
               + Nuevo Combo
             </button>
@@ -332,15 +332,15 @@ export default function CombosAdminPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="bg-gradient-to-br from-pink-600/20 to-rose-600/20 border border-pink-500/30 rounded-lg p-3">
+          <div className="bg-pink-600/10 border border-pink-500/30 rounded-lg p-3">
             <div className="text-sm text-pink-300 mb-1">Total Combos</div>
             <div className="text-2xl font-bold text-white">{combos.length}</div>
           </div>
-          <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-500/30 rounded-lg p-3">
+          <div className="bg-green-600/10 border border-green-500/30 rounded-lg p-3">
             <div className="text-sm text-green-300 mb-1">Activos</div>
             <div className="text-2xl font-bold text-white">{combos.filter(c => c.activo).length}</div>
           </div>
-          <div className="bg-gradient-to-br from-orange-600/20 to-red-600/20 border border-orange-500/30 rounded-lg p-3">
+          <div className="bg-orange-600/10 border border-orange-500/30 rounded-lg p-3">
             <div className="text-sm text-orange-300 mb-1">Productos BASE</div>
             <div className="text-2xl font-bold text-white">{productosBase.length}</div>
           </div>
@@ -387,7 +387,7 @@ export default function CombosAdminPage() {
             {combos.map((combo) => (
               <div
                 key={combo.id}
-                className={`bg-gradient-to-br from-[#0f1419] to-[#1a1f2e] border-2 ${
+                className={`bg-[#1a1f2e] border-2 ${
                   combo.activo ? 'border-pink-500/30' : 'border-red-500/50'
                 } rounded-xl p-4 hover:border-pink-500/50 transition-all`}
               >
@@ -443,13 +443,13 @@ export default function CombosAdminPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => abrirFormEditar(combo)}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md flex items-center justify-center gap-2"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md flex items-center justify-center gap-2"
                   >
                     ✏️ Editar
                   </button>
                   <button
                     onClick={() => eliminarCombo(combo.id, combo.nombre)}
-                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md"
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 text-sm shadow-md"
                   >
                     🗑️
                   </button>
@@ -707,7 +707,7 @@ export default function CombosAdminPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 disabled:from-gray-700 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                  className="flex-1 bg-pink-600 hover:bg-pink-700 disabled:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
                 >
                   {loading ? 'Guardando...' : editando ? 'Actualizar Combo' : 'Crear Combo'}
                 </button>

@@ -64,7 +64,7 @@ export default function TransaccionesAdminPage() {
     setLoading(true);
     
     try {
-      const res = await fetch(`/api/pedidos?eventoId=${eventoSeleccionado}`, {
+      const res = await fetch(`/api/pedidos?eventoId=${eventoSeleccionado}&limit=1000`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -143,7 +143,7 @@ export default function TransaccionesAdminPage() {
         >
           ← Volver al Dashboard
         </button>
-        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 flex items-center gap-3">
+        <h1 className="text-4xl font-bold text-white flex items-center gap-3">
           💳 Historial de Transacciones
         </h1>
       </div>
@@ -168,7 +168,7 @@ export default function TransaccionesAdminPage() {
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-2 border-green-500/30 rounded-xl p-6">
+        <div className="bg-green-600/10 border-2 border-green-500/30 rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-green-300 uppercase">Total Cobrado</div>
             <div className="text-2xl">💰</div>
@@ -176,7 +176,7 @@ export default function TransaccionesAdminPage() {
           <div className="text-4xl font-bold text-green-400">${estadisticas.total.toFixed(0)}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-2 border-blue-500/30 rounded-xl p-6">
+        <div className="bg-blue-600/10 border-2 border-blue-500/30 rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-blue-300 uppercase">Pagados</div>
             <div className="text-2xl">✅</div>
@@ -184,7 +184,7 @@ export default function TransaccionesAdminPage() {
           <div className="text-4xl font-bold text-white">{estadisticas.pagados}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border-2 border-yellow-500/30 rounded-xl p-6">
+        <div className="bg-yellow-600/10 border-2 border-yellow-500/30 rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-yellow-300 uppercase">Pendientes</div>
             <div className="text-2xl">⏳</div>
@@ -192,7 +192,7 @@ export default function TransaccionesAdminPage() {
           <div className="text-4xl font-bold text-yellow-400">{estadisticas.pendientes}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-600/20 to-rose-600/20 border-2 border-red-500/30 rounded-xl p-6">
+        <div className="bg-red-600/10 border-2 border-red-500/30 rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-red-300 uppercase">Rechazados</div>
             <div className="text-2xl">❌</div>
@@ -263,7 +263,7 @@ export default function TransaccionesAdminPage() {
             {pedidosFiltrados.map((pedido) => (
               <div
                 key={pedido.id}
-                className="bg-gradient-to-br from-[#0f1419] to-[#1a1f2e] border-2 border-gray-700 rounded-xl p-4 hover:border-blue-500/50 transition-all"
+                className="bg-[#1a1f2e] border-2 border-gray-700 rounded-xl p-4 hover:border-blue-500/50 transition-all"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex-1">

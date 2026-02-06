@@ -28,16 +28,69 @@ interface Barra {
   activa: boolean;
 }
 
-type SeccionActiva = 'eventos' | 'cajas' | 'barras';
+type SeccionActiva = 'eventos' | 'cajas' | 'barras' | 'app';
 
 export default function ConfiguracionAdminPage() {
   const router = useRouter();
   const [seccionActiva, setSeccionActiva] = useState<SeccionActiva>('eventos');
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isIOSDevice, setIsIOSDevice] = useState(false);
   const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
 
   const mostrarMensaje = (tipo: string, texto: string) => {
     setMensaje({ tipo, texto });
     setTimeout(() => setMensaje({ tipo: '', texto: '' }), 5000);
+  };
+
+  useEffect(() => {
+    // Verificar si es iOS
+    const checkIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOSDevice(checkIOS);
+
+    // Verificar si ya está instalado
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      setIsInstalled(true);
+      return;
+    }
+
+    // Escuchar el evento beforeinstallprompt
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+
+    // Verificar si ya está instalado (iOS)
+    if ((navigator as any).standalone) {
+      setIsInstalled(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) {
+      // En iOS, mostrar instrucciones
+      if (isIOSDevice) {
+        mostrarMensaje('success', 'Para instalar en iOS:\n1. Toca el botón Compartir ⬆️\n2. Selecciona "Agregar a pantalla de inicio"');
+        return;
+      }
+      return;
+    }
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      setIsInstalled(true);
+      mostrarMensaje('success', '¡App instalada correctamente!');
+    }
+
+    setDeferredPrompt(null);
   };
 
   return (
@@ -46,7 +99,7 @@ export default function ConfiguracionAdminPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-bold text-white flex items-center gap-3 mb-2">
               ⚙️ Configuración del Sistema
             </h1>
             <p className="text-gray-400 text-sm">Gestiona eventos, cajas y barras</p>
@@ -73,7 +126,7 @@ export default function ConfiguracionAdminPage() {
           onClick={() => setSeccionActiva('eventos')}
           className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
             seccionActiva === 'eventos'
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+              ? 'bg-purple-600 text-white shadow-lg'
               : 'text-gray-400 hover:text-white hover:bg-[#0f1419]'
           }`}
         >
@@ -83,7 +136,7 @@ export default function ConfiguracionAdminPage() {
           onClick={() => setSeccionActiva('cajas')}
           className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
             seccionActiva === 'cajas'
-              ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
+              ? 'bg-blue-600 text-white shadow-lg'
               : 'text-gray-400 hover:text-white hover:bg-[#0f1419]'
           }`}
         >
@@ -93,11 +146,21 @@ export default function ConfiguracionAdminPage() {
           onClick={() => setSeccionActiva('barras')}
           className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
             seccionActiva === 'barras'
-              ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg'
+              ? 'bg-green-600 text-white shadow-lg'
               : 'text-gray-400 hover:text-white hover:bg-[#0f1419]'
           }`}
         >
           🍹 Barras
+        </button>
+        <button
+          onClick={() => setSeccionActiva('app')}
+          className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all ${
+            seccionActiva === 'app'
+              ? 'bg-cyan-600 text-white shadow-lg'
+              : 'text-gray-400 hover:text-white hover:bg-[#0f1419]'
+          }`}
+        >
+          📱 App
         </button>
       </div>
 
@@ -105,6 +168,99 @@ export default function ConfiguracionAdminPage() {
       {seccionActiva === 'eventos' && <EventosSeccion mostrarMensaje={mostrarMensaje} />}
       {seccionActiva === 'cajas' && <CajasSeccion mostrarMensaje={mostrarMensaje} />}
       {seccionActiva === 'barras' && <BarrasSeccion mostrarMensaje={mostrarMensaje} />}
+      {seccionActiva === 'app' && (
+        <div className="bg-[#1a1f2e] border border-gray-800 rounded-xl p-6">
+          <h2 className="text-2xl font-bold text-white mb-4">Configuración de la App</h2>
+          
+          <div className="space-y-6">
+            {/* Información de la PWA */}
+            <div className="bg-[#0f1419] border border-gray-700 rounded-lg p-6">
+              <div className="flex items-start gap-4">
+                <div className="text-5xl">📱</div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-white mb-2">Instalar como App</h3>
+                  <p className="text-gray-400 mb-4">
+                    Instala el Sistema de Barra en tu dispositivo para un acceso más rápido y una mejor experiencia.
+                  </p>
+                  
+                  {isInstalled ? (
+                    <div className="bg-green-900/20 border border-green-600 rounded-lg p-4">
+                      <p className="text-green-400 font-medium flex items-center gap-2">
+                        <span className="text-2xl">✓</span>
+                        <span>App instalada correctamente</span>
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {deferredPrompt || isIOSDevice ? (
+                        <button
+                          onClick={handleInstall}
+                          className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center gap-2"
+                        >
+                          <span className="text-xl">⬇️</span>
+                          <span>Instalar App</span>
+                        </button>
+                      ) : (
+                        <div className="bg-blue-900/20 border border-blue-600 rounded-lg p-4">
+                          <p className="text-blue-400 text-sm">
+                            La aplicación ya está disponible como PWA. Para instalarla, busca la opción "Instalar" o "Agregar a pantalla de inicio" en el menú de tu navegador.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {isIOSDevice && (
+                        <div className="mt-4 bg-purple-900/20 border border-purple-600 rounded-lg p-4">
+                          <p className="text-purple-400 font-medium mb-2">Instrucciones para iOS:</p>
+                          <ol className="text-gray-300 text-sm space-y-1 ml-4 list-decimal">
+                            <li>Toca el botón de compartir (⬆️)</li>
+                            <li>Selecciona "Agregar a pantalla de inicio"</li>
+                            <li>Toca "Agregar"</li>
+                          </ol>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Beneficios */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-[#0f1419] border border-gray-700 rounded-lg p-4">
+                <div className="text-3xl mb-2">⚡</div>
+                <h4 className="font-bold text-white mb-1">Acceso Rápido</h4>
+                <p className="text-gray-400 text-sm">
+                  Abre la app directamente desde tu pantalla de inicio
+                </p>
+              </div>
+              
+              <div className="bg-[#0f1419] border border-gray-700 rounded-lg p-4">
+                <div className="text-3xl mb-2">📴</div>
+                <h4 className="font-bold text-white mb-1">Funciona Sin Internet</h4>
+                <p className="text-gray-400 text-sm">
+                  Algunas funciones disponibles offline
+                </p>
+              </div>
+              
+              <div className="bg-[#0f1419] border border-gray-700 rounded-lg p-4">
+                <div className="text-3xl mb-2">🎨</div>
+                <h4 className="font-bold text-white mb-1">Experiencia Nativa</h4>
+                <p className="text-gray-400 text-sm">
+                  Pantalla completa sin la barra del navegador
+                </p>
+              </div>
+              
+              <div className="bg-[#0f1419] border border-gray-700 rounded-lg p-4">
+                <div className="text-3xl mb-2">🔔</div>
+                <h4 className="font-bold text-white mb-1">Notificaciones</h4>
+                <p className="text-gray-400 text-sm">
+                  Recibe actualizaciones importantes (próximamente)
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -231,7 +387,7 @@ function EventosSeccion({ mostrarMensaje }: { mostrarMensaje: (tipo: string, tex
           <h2 className="text-2xl font-bold text-white">Eventos</h2>
           <button
             onClick={abrirModalNuevo}
-            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105"
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105"
           >
             + Nuevo Evento
           </button>
@@ -239,7 +395,7 @@ function EventosSeccion({ mostrarMensaje }: { mostrarMensaje: (tipo: string, tex
 
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-4 border-blue-500 mb-3"></div>
+            <div className="inline-block rounded-full h-10 w-10 border-b-4 border-blue-500 mb-3"></div>
             <p className="text-gray-400 font-semibold">Cargando...</p>
           </div>
         ) : eventos.length === 0 ? (
@@ -267,7 +423,7 @@ function EventosSeccion({ mostrarMensaje }: { mostrarMensaje: (tipo: string, tex
                   </span>
                   <button
                     onClick={() => abrirModalEditar(evento)}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
                   >
                     ✏️ Editar
                   </button>
@@ -341,7 +497,7 @@ function EventosSeccion({ mostrarMensaje }: { mostrarMensaje: (tipo: string, tex
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
                 >
                   {loading ? 'Guardando...' : editando ? 'Actualizar' : 'Crear Evento'}
                 </button>
@@ -394,7 +550,7 @@ function CajasSeccion({ mostrarMensaje }: { mostrarMensaje: (tipo: string, texto
     <div className="bg-[#1a1f2e] border border-gray-800 rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-white">Cajas</h2>
-        <button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105">
+        <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105">
           + Nueva Caja
         </button>
       </div>
@@ -470,7 +626,7 @@ function BarrasSeccion({ mostrarMensaje }: { mostrarMensaje: (tipo: string, text
     <div className="bg-[#1a1f2e] border border-gray-800 rounded-xl p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-white">Barras</h2>
-        <button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105">
+        <button className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-all transform hover:scale-105">
           + Nueva Barra
         </button>
       </div>

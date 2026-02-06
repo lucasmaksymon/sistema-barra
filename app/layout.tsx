@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { InstallPWA } from "@/components/InstallPWA";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,12 +16,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Sistema de Barra",
   description: "Sistema de gestión de pedidos para barra",
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
   // Optimizaciones PWA
   appleWebApp: {
     capable: true,
@@ -31,6 +25,13 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({
@@ -50,8 +51,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased touch-manipulation`}
         suppressHydrationWarning
       >
-        {children}
-        <InstallPWA />
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

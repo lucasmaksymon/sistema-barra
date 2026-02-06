@@ -264,7 +264,7 @@ export default function InventarioAdminPage() {
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400 flex items-center gap-3 mb-2">
+            <h1 className="text-4xl font-bold text-white flex items-center gap-3 mb-2">
               📦 Gestión de Inventario
             </h1>
             <p className="text-gray-400 text-sm">Administra el stock de todos tus productos</p>
@@ -327,7 +327,7 @@ export default function InventarioAdminPage() {
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-2 border-blue-500/30 rounded-xl p-6">
+        <div className="bg-blue-600/10 border-2 border-blue-500/30 rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-blue-300 uppercase">Total Items</div>
             <div className="text-2xl">📦</div>
@@ -335,7 +335,7 @@ export default function InventarioAdminPage() {
           <div className="text-4xl font-bold text-white">{estadisticas.total}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border-2 border-yellow-500/30 rounded-xl p-6">
+        <div className="bg-yellow-600/10 border-2 border-yellow-500/30 rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-yellow-300 uppercase">Stock Bajo</div>
             <div className="text-2xl">⚠️</div>
@@ -343,7 +343,7 @@ export default function InventarioAdminPage() {
           <div className="text-4xl font-bold text-yellow-400">{estadisticas.bajo}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-600/20 to-rose-600/20 border-2 border-red-500/30 rounded-xl p-6">
+        <div className="bg-red-600/10 border-2 border-red-500/30 rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-red-300 uppercase">Agotados</div>
             <div className="text-2xl">🚨</div>
@@ -351,7 +351,7 @@ export default function InventarioAdminPage() {
           <div className="text-4xl font-bold text-red-400">{estadisticas.agotado}</div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-2 border-green-500/30 rounded-xl p-6">
+        <div className="bg-green-600/10 border-2 border-green-500/30 rounded-xl p-6">
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold text-green-300 uppercase">En Stock</div>
             <div className="text-2xl">✅</div>
@@ -482,14 +482,14 @@ export default function InventarioAdminPage() {
                   <button
                     onClick={() => abrirModalAjuste(item)}
                     disabled={STOCK_DESHABILITADO}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 disabled:transform-none text-sm shadow-md flex items-center justify-center gap-2"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 disabled:transform-none text-sm shadow-md flex items-center justify-center gap-2"
                   >
                     📝 Ajustar Stock
                   </button>
                   <button
                     onClick={() => abrirModalUmbral(item)}
                     disabled={STOCK_DESHABILITADO}
-                    className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 disabled:transform-none text-sm shadow-md"
+                    className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 text-white font-semibold py-2.5 px-4 rounded-lg transition-all transform hover:scale-105 active:scale-95 disabled:transform-none text-sm shadow-md"
                     title="Cambiar umbral de alerta"
                   >
                     ⚙️
@@ -604,9 +604,9 @@ export default function InventarioAdminPage() {
                   disabled={loading}
                   className={`flex-1 font-bold py-3 px-6 rounded-lg transition-all ${
                     tipoAjuste === 'entrada'
-                      ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500'
-                      : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500'
-                  } disabled:from-gray-700 disabled:to-gray-700 text-white`}
+                      ? 'bg-green-600 hover:bg-green-700'
+                      : 'bg-red-600 hover:bg-red-700'
+                  } disabled:bg-gray-700 text-white`}
                 >
                   {loading ? 'Ajustando...' : tipoAjuste === 'entrada' ? '✓ Agregar Stock' : '✓ Restar Stock'}
                 </button>
@@ -661,7 +661,7 @@ export default function InventarioAdminPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
                 >
                   {loading ? 'Actualizando...' : '✓ Actualizar'}
                 </button>

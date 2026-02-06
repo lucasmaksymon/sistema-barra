@@ -261,7 +261,7 @@ export async function GET(request: NextRequest) {
     const eventoId = searchParams.get('eventoId');
     const estado = searchParams.get('estado');
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = parseInt(searchParams.get('limit') || '200');
 
     const where: any = {};
 

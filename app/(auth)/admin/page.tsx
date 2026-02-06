@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast, Button, Select, Card, ConfirmModal, Spinner } from '@/components/ui';
+import { StatsCard, PedidoCard } from '@/components/domain';
 
 interface Stats {
   totalPedidos: number;
@@ -13,6 +15,8 @@ interface Stats {
 
 export default function AdminPage() {
   const router = useRouter();
+  const toast = useToast();
+  
   const [eventos, setEventos] = useState<any[]>([]);
   const [eventoSeleccionado, setEventoSeleccionado] = useState('');
   const [stats, setStats] = useState<Stats>({
@@ -23,9 +27,12 @@ export default function AdminPage() {
     totalVentas: 0,
   });
   const [pagosPendientes, setPagosPendientes] = useState<any[]>([]);
-  const [stockBajo, setStockBajo] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingDashboard, setLoadingDashboard] = useState(false);
+  
+  // Modal de confirmación
+  const [pedidoParaAprobar, setPedidoParaAprobar] = useState<any>(null);
+  const [accionAprobacion, setAccionAprobacion] = useState<'aprobar' | 'rechazar' | null>(null);
 
   useEffect(() => {
     cargarEventos();
@@ -51,6 +58,7 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error('Error al cargar eventos:', error);
+      toast.error('Error', 'No se pudieron cargar los eventos');
     }
   };
 
@@ -59,23 +67,18 @@ export default function AdminPage() {
     setLoadingDashboard(true);
     
     try {
-      // Optimización: cargar todo en paralelo
-      const [resPedidos, resPagos, resStock] = await Promise.all([
-        fetch(`/api/pedidos?eventoId=${eventoSeleccionado}&limit=99999`, {
+      const [resPedidos, resPagos] = await Promise.all([
+        fetch(`/api/pedidos?eventoId=${eventoSeleccionado}&limit=1000`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch('/api/pagos/pendientes', {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`/api/inventario/stock?eventoId=${eventoSeleccionado}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
       ]);
 
-      const [dataPedidos, dataPagos, dataStock] = await Promise.all([
+      const [dataPedidos, dataPagos] = await Promise.all([
         resPedidos.json(),
         resPagos.json(),
-        resStock.json(),
       ]);
       
       if (dataPedidos.success) {
@@ -99,139 +102,130 @@ export default function AdminPage() {
       if (dataPagos.success) {
         setPagosPendientes(dataPagos.data.filter((p: any) => p.eventoId === eventoSeleccionado));
       }
-
-      if (dataStock.success) {
-        const bajo = dataStock.data.filter(
-          (s: any) => s.umbralBajo && s.disponible <= s.umbralBajo
-        );
-        setStockBajo(bajo);
-      }
     } catch (error) {
       console.error('Error al cargar dashboard:', error);
+      toast.error('Error', 'No se pudo cargar el dashboard');
     } finally {
       setLoadingDashboard(false);
     }
   };
 
-  const aprobarPago = async (pedidoId: string, aprobado: boolean) => {
+  const confirmarAprobacion = (pedido: any, aprobar: boolean) => {
+    setPedidoParaAprobar(pedido);
+    setAccionAprobacion(aprobar ? 'aprobar' : 'rechazar');
+  };
+
+  const ejecutarAprobacion = async () => {
+    if (!pedidoParaAprobar || !accionAprobacion) return;
+    
     setLoading(true);
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch(`/api/pagos/${pedidoId}/aprobar`, {
+      const res = await fetch(`/api/pagos/${pedidoParaAprobar.id}/aprobar`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ aprobado }),
+        body: JSON.stringify({ aprobado: accionAprobacion === 'aprobar' }),
       });
 
       const data = await res.json();
 
       if (data.success) {
-        alert(data.message);
+        toast.success(
+          accionAprobacion === 'aprobar' ? 'Pago aprobado' : 'Pago rechazado',
+          data.message
+        );
         cargarDashboard();
       } else {
-        alert(data.error);
+        toast.error('Error', data.error || 'No se pudo procesar la acción');
       }
     } catch (error) {
-      alert('Error de conexión');
+      toast.error('Error de conexión', 'No se pudo procesar la acción');
     } finally {
       setLoading(false);
+      setPedidoParaAprobar(null);
+      setAccionAprobacion(null);
     }
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-3 md:p-4 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
               Dashboard
             </h1>
-            <p className="text-gray-400">Panel de control y gestión del sistema</p>
+            <p className="text-sm text-gray-400">Panel de control y gestión del sistema</p>
           </div>
-          <div className="hidden sm:block text-6xl">📊</div>
+          <div className="hidden sm:block text-4xl">📊</div>
         </div>
         
-        <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] border border-gray-700 rounded-xl p-4 shadow-lg">
-          <label className="block text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wide">
-            🎪 Evento Activo
-          </label>
-          <select
+        <Card>
+          <Select
+            label="🎪 Evento Activo"
             value={eventoSeleccionado}
             onChange={(e) => setEventoSeleccionado(e.target.value)}
-            className="w-full md:w-96 px-4 py-3 bg-[#0f1419] border-2 border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold text-lg transition-all"
-          >
-            {eventos.map((evento) => (
-              <option key={evento.id} value={evento.id}>
-                {evento.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+            options={eventos.map(e => ({ value: e.id, label: e.nombre }))}
+            className="md:w-96"
+          />
+        </Card>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 relative">
-        {loadingDashboard && (
-          <div className="absolute inset-0 bg-[#0f1419]/80 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-blue-500 mb-2"></div>
-              <p className="text-gray-300 font-semibold">Actualizando...</p>
-            </div>
-          </div>
-        )}
-        <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border-2 border-blue-500/30 rounded-xl p-6 hover:scale-105 transition-transform">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm font-semibold text-blue-300 uppercase tracking-wide">Total Pedidos</div>
-            <div className="text-2xl">📋</div>
-          </div>
-          <div className="text-4xl font-bold text-white mb-1">{stats.totalPedidos}</div>
-          <div className="text-xs text-gray-400">Pedidos registrados</div>
+      {loadingDashboard ? (
+        <div className="flex justify-center py-12">
+          <Spinner size="lg" text="Cargando estadísticas..." />
         </div>
-        
-        <div className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 border-2 border-yellow-500/30 rounded-xl p-6 hover:scale-105 transition-transform">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm font-semibold text-yellow-300 uppercase tracking-wide">Pendientes</div>
-            <div className="text-2xl">⏳</div>
-          </div>
-          <div className="text-4xl font-bold text-yellow-400 mb-1">{stats.pedidosPendientes}</div>
-          <div className="text-xs text-gray-400">Por entregar</div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 mb-4">
+          <StatsCard
+            title="Total Pedidos"
+            value={stats.totalPedidos}
+            icon="📋"
+            color="blue"
+            subtitle="Pedidos registrados"
+          />
+          
+          <StatsCard
+            title="Pendientes"
+            value={stats.pedidosPendientes}
+            icon="⏳"
+            color="yellow"
+            subtitle="Por entregar"
+          />
+          
+          <StatsCard
+            title="Entregados"
+            value={stats.pedidosEntregados}
+            icon="✅"
+            color="green"
+            subtitle="Completados"
+          />
+          
+          <StatsCard
+            title="Ventas Totales"
+            value={`$${stats.totalVentas.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+            icon="💰"
+            color="purple"
+            subtitle="Ingresos generados"
+          />
         </div>
-        
-        <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border-2 border-green-500/30 rounded-xl p-6 hover:scale-105 transition-transform">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm font-semibold text-green-300 uppercase tracking-wide">Entregados</div>
-            <div className="text-2xl">✅</div>
-          </div>
-          <div className="text-4xl font-bold text-green-400 mb-1">{stats.pedidosEntregados}</div>
-          <div className="text-xs text-gray-400">Completados</div>
-        </div>
-        
-        <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-2 border-purple-500/30 rounded-xl p-6 hover:scale-105 transition-transform">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-sm font-semibold text-purple-300 uppercase tracking-wide">Ventas Totales</div>
-            <div className="text-2xl">💰</div>
-          </div>
-          <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">
-            ${stats.totalVentas.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-          </div>
-          <div className="text-xs text-gray-400">Ingresos generados</div>
-        </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pagos Pendientes */}
-        <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] border-2 border-yellow-500/30 rounded-xl p-6 shadow-lg">
+        <Card>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <span className="text-2xl">💳</span>
               Transferencias Pendientes
             </h2>
-            <span className="bg-gradient-to-r from-yellow-500/30 to-orange-500/30 text-yellow-400 px-4 py-2 rounded-xl font-bold text-lg border-2 border-yellow-500/50 shadow-lg">
+            <span className="bg-yellow-600 text-white px-4 py-2 rounded-xl font-bold text-lg shadow-lg">
               {pagosPendientes.length}
             </span>
           </div>
@@ -245,18 +239,10 @@ export default function AdminPage() {
           ) : (
             <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-hide">
               {pagosPendientes.map((pedido) => (
-                <div
-                  key={pedido.id}
-                  className="border-2 border-yellow-500/50 bg-gradient-to-br from-[#0f1419] to-yellow-900/10 rounded-xl p-4 hover:border-yellow-400/70 transition-all"
-                >
+                <Card key={pedido.id} padding="md" className="border-2 border-yellow-600/50">
                   <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <p className="font-bold text-white text-lg">{pedido.codigo}</p>
-                        <span className="bg-yellow-500/20 text-yellow-400 text-xs px-2 py-1 rounded-full border border-yellow-500/50 font-semibold">
-                          PENDIENTE
-                        </span>
-                      </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-white text-lg mb-1">{pedido.codigo}</p>
                       <p className="text-sm text-gray-300">
                         <span className="font-semibold">Caja:</span> {pedido.caja.nombre}
                       </p>
@@ -275,36 +261,40 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-3">
+                  <div className="bg-blue-900/20 border border-blue-600 rounded-lg p-3 mb-3">
                     <p className="text-xs text-blue-300">
-                      <span className="font-semibold">ℹ️ Instrucción:</span> Verifica que el cliente haya realizado la transferencia y muestre el comprobante antes de aprobar.
+                      <span className="font-semibold">ℹ️ Instrucción:</span> Verifica el comprobante de transferencia antes de aprobar.
                     </p>
                   </div>
 
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => aprobarPago(pedido.id, true)}
+                    <Button
+                      variant="success"
+                      size="sm"
+                      fullWidth
+                      onClick={() => confirmarAprobacion(pedido, true)}
                       disabled={loading}
-                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 disabled:bg-gray-700 disabled:from-gray-700 disabled:to-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-xl active:scale-95 transform"
                     >
-                      ✓ Aprobar Pago
-                    </button>
-                    <button
-                      onClick={() => aprobarPago(pedido.id, false)}
+                      ✓ Aprobar
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      fullWidth
+                      onClick={() => confirmarAprobacion(pedido, false)}
                       disabled={loading}
-                      className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:bg-gray-700 disabled:from-gray-700 disabled:to-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-lg hover:shadow-xl active:scale-95 transform"
                     >
                       ✗ Rechazar
-                    </button>
+                    </Button>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}
-        </div>
+        </Card>
 
-        {/* Stock Bajo - DESHABILITADO */}
-        <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] border-2 border-gray-700 rounded-xl p-6 shadow-lg opacity-50">
+        {/* Stock Bajo - Deshabilitado */}
+        <Card className="opacity-50">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <span className="text-2xl">⚠️</span>
@@ -318,9 +308,27 @@ export default function AdminPage() {
             <p className="mb-2">Control de stock deshabilitado</p>
             <p className="text-xs text-gray-600">Las alertas de stock no están activas</p>
           </div>
-        </div>
+        </Card>
       </div>
 
+      {/* Modal de confirmación */}
+      <ConfirmModal
+        isOpen={!!pedidoParaAprobar}
+        onClose={() => {
+          setPedidoParaAprobar(null);
+          setAccionAprobacion(null);
+        }}
+        onConfirm={ejecutarAprobacion}
+        title={accionAprobacion === 'aprobar' ? 'Aprobar Pago' : 'Rechazar Pago'}
+        message={
+          accionAprobacion === 'aprobar'
+            ? `¿Confirmas que recibiste la transferencia del pedido ${pedidoParaAprobar?.codigo}?`
+            : `¿Estás seguro de rechazar el pago del pedido ${pedidoParaAprobar?.codigo}?`
+        }
+        confirmText={accionAprobacion === 'aprobar' ? 'Aprobar' : 'Rechazar'}
+        variant={accionAprobacion === 'aprobar' ? 'primary' : 'danger'}
+        isLoading={loading}
+      />
     </div>
   );
 }
